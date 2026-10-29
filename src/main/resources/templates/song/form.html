@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(~{::content})}">
+<head>
+    <title th:text="${isEdit ? 'Edit Song - BeatStream' : 'Add New Song - BeatStream'}">Song Form</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="d-flex align-items-center mb-3">
+                <a th:href="@{/songs}" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i> Back to Songs</a>
+                <h2 class="fw-bold mb-0" th:text="${isEdit ? 'Edit Song' : 'Add New Song'}">Song Form</h2>
+            </div>
+
+            <div class="custom-card p-4 p-sm-5 shadow-lg">
+                <form th:action="${isEdit ? '/songs/' + songId + '/edit' : '/songs/new'}" th:object="${songForm}" method="post">
+                    <!-- CSRF Token -->
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label text-secondary small fw-semibold">Song Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="title"
+                               th:field="*{title}" placeholder="e.g. Midnight City Lights"
+                               th:classappend="${#fields.hasErrors('title') ? 'is-invalid' : ''}" required>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title error</div>
+                    </div>
+
+                    <!-- Artist -->
+                    <div class="mb-3">
+                        <label for="artist" class="form-label text-secondary small fw-semibold">Artist <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="artist"
+                               th:field="*{artist}" placeholder="e.g. Neon Horizon"
+                               th:classappend="${#fields.hasErrors('artist') ? 'is-invalid' : ''}" required>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('artist')}" th:errors="*{artist}">Artist error</div>
+                    </div>
+
+                    <!-- Album -->
+                    <div class="mb-3">
+                        <label for="album" class="form-label text-secondary small fw-semibold">Album (Optional)</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="album"
+                               th:field="*{album}" placeholder="e.g. Synthwave Dreams"
+                               th:classappend="${#fields.hasErrors('album') ? 'is-invalid' : ''}">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('album')}" th:errors="*{album}">Album error</div>
+                    </div>
+
+                    <!-- Genre & Duration -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="genre" class="form-label text-secondary small fw-semibold">Genre <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-dark text-light border-secondary" id="genre"
+                                   th:field="*{genre}" placeholder="e.g. Synthwave, Rock, Pop"
+                                   th:classappend="${#fields.hasErrors('genre') ? 'is-invalid' : ''}" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}">Genre error</div>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label for="durationSeconds" class="form-label text-secondary small fw-semibold">Duration (Seconds) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control bg-dark text-light border-secondary" id="durationSeconds"
+                                   th:field="*{durationSeconds}" placeholder="e.g. 245" min="1" max="36000"
+                                   th:classappend="${#fields.hasErrors('durationSeconds') ? 'is-invalid' : ''}" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('durationSeconds')}" th:errors="*{durationSeconds}">Duration error</div>
+                        </div>
+                    </div>
+
+                    <!-- Release Year -->
+                    <div class="mb-4">
+                        <label for="releaseYear" class="form-label text-secondary small fw-semibold">Release Year (Optional)</label>
+                        <input type="number" class="form-control bg-dark text-light border-secondary" id="releaseYear"
+                               th:field="*{releaseYear}" placeholder="e.g. 2024" min="1900" max="2100"
+                               th:classappend="${#fields.hasErrors('releaseYear') ? 'is-invalid' : ''}">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('releaseYear')}" th:errors="*{releaseYear}">Release year error</div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/songs}" class="btn btn-outline-secondary px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary-custom px-4" th:text="${isEdit ? 'Update Song' : 'Create Song'}">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

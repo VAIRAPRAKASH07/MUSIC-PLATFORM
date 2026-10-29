@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Reusable Pagination Fragment -->
+<div th:fragment="pagination(page, baseUrl, query, genre, sortField, sortDir)">
+    <nav th:if="${page.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Button -->
+            <li class="page-item" th:classappend="${page.first ? 'disabled' : ''}">
+                <a class="page-link bg-dark text-light border-secondary"
+                   th:href="@{${baseUrl}(page=${page.number - 1}, size=${page.size}, query=${query}, genre=${genre}, sort=${sortField}, dir=${sortDir})}"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Page Number Loop -->
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${page.number == i ? 'active' : ''}">
+                <a class="page-link"
+                   th:classappend="${page.number == i ? 'bg-success text-white border-success' : 'bg-dark text-light border-secondary'}"
+                   th:href="@{${baseUrl}(page=${i}, size=${page.size}, query=${query}, genre=${genre}, sort=${sortField}, dir=${sortDir})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+
+            <!-- Next Button -->
+            <li class="page-item" th:classappend="${page.last ? 'disabled' : ''}">
+                <a class="page-link bg-dark text-light border-secondary"
+                   th:href="@{${baseUrl}(page=${page.number + 1}, size=${page.size}, query=${query}, genre=${genre}, sort=${sortField}, dir=${sortDir})}"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

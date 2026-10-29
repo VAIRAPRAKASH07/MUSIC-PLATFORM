@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::content})}">
+<head>
+    <title>My Favourites - BeatStream</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="mb-3">
+        <a th:href="@{/playlists}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Playlists</a>
+    </div>
+
+    <!-- Favourites Header Banner -->
+    <div class="custom-card p-4 p-md-5 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+            <div class="rounded-3 p-4 favourites-cover d-flex align-items-center justify-content-center text-white border border-secondary"
+                 style="width: 140px; height: 140px;">
+                <i class="bi bi-heart-fill fs-1"></i>
+            </div>
+            <div class="text-center text-md-start flex-grow-1">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                    <span class="badge bg-danger">System Favourites</span>
+                    <span class="text-secondary small" th:text="${playlist.songCount + ' favourite tracks • ' + playlist.formattedTotalDuration}">0 tracks • 0:00</span>
+                </div>
+                <h1 class="fw-bold mb-2">My Favourites</h1>
+                <p class="text-secondary mb-3">All tracks you have marked with a heart across the platform are gathered here automatically.</p>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2">
+                    <!-- Play Favourites -->
+                    <button class="btn btn-primary-custom btn-play-playlist" th:data-playlist-id="${playlist.id}" data-shuffle="false"
+                            th:disabled="${playlist.songCount == 0}">
+                        <i class="bi bi-play-fill me-1"></i> Play Favourites
+                    </button>
+                    <!-- Shuffle Play -->
+                    <button class="btn btn-outline-danger rounded-pill px-3 btn-play-playlist" th:data-playlist-id="${playlist.id}" data-shuffle="true"
+                            th:disabled="${playlist.songCount == 0}">
+                        <i class="bi bi-shuffle me-1"></i> Shuffle Favourites
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favourites Tracks Table -->
+    <div class="custom-card overflow-hidden">
+        <div class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Favourite Songs (<span th:text="${playlist.songCount}">0</span>)</h5>
+            <a th:href="@{/songs}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                <i class="bi bi-plus me-1"></i> Find More Songs
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="width: 50px;"></th>
+                    <th style="width: 40px;"></th>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Album</th>
+                    <th>Genre</th>
+                    <th>Duration</th>
+                    <th style="width: 60px;" class="text-end"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Empty State -->
+                <tr th:if="${playlistSongs.empty}">
+                    <td colspan="9" class="text-center py-5 text-secondary">
+                        <i class="bi bi-heart fs-1 mb-2 d-block text-danger"></i>
+                        <h5>No favourite songs yet</h5>
+                        <p class="small mb-3">Click the heart icon on any song in the catalog to add it here.</p>
+                        <a th:href="@{/songs}" class="btn btn-sm btn-primary-custom">Browse Songs</a>
+                    </td>
+                </tr>
+
+                <!-- Tracks -->
+                <tr th:each="ps, iterStat : ${playlistSongs}">
+                    <!-- Position -->
+                    <td class="text-secondary fw-semibold" th:text="${iterStat.count}">1</td>
+
+                    <!-- Play Track Button -->
+                    <td>
+                        <button class="btn-play-row btn-play-song" th:data-song-id="${ps.songId}" title="Play Track">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </button>
+                    </td>
+
+                    <!-- Heart Toggle Button -->
+                    <td>
+                        <button class="btn-heart active" th:data-song-id="${ps.songId}" title="Remove from Favourites">
+                            <i class="bi bi-heart-fill"></i>
+                        </button>
+                    </td>
+
+                    <!-- Title -->
+                    <td>
+                        <a th:href="@{/songs/{id}(id=${ps.songId})}" class="text-light fw-semibold text-decoration-none" th:text="${ps.title}">Title</a>
+                    </td>
+
+                    <!-- Artist -->
+                    <td class="text-secondary" th:text="${ps.artist}">Artist</td>
+
+                    <!-- Album -->
+                    <td class="text-secondary" th:text="${ps.album != null and !ps.album.isBlank() ? ps.album : '-'}">Album</td>
+
+                    <!-- Genre Badge -->
+                    <td>
+                        <span class="badge-genre" th:text="${ps.genre}">Genre</span>
+                    </td>
+
+                    <!-- Duration -->
+                    <td class="text-secondary" th:text="${ps.formattedDuration}">3:45</td>
+
+                    <!-- Actions -->
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-secondary btn-add-queue" th:data-song-id="${ps.songId}" title="Add to Queue">
+                            <i class="bi bi-list-ul"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

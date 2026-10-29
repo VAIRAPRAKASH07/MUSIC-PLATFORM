@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::content})}">
+<head>
+    <title>Song Catalog - Music Platform</title>
+</head>
+<body>
+<div th:fragment="content">
+    <!-- Header & Action -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Music Catalog</h2>
+            <p class="text-secondary small mb-0">Browse, search, favourite, and add tracks to your playlists</p>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/songs/new}" class="btn btn-primary-custom shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Add New Song
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="custom-card p-3 p-md-4 mb-4">
+        <form th:action="@{/songs}" method="get" class="row g-3 align-items-end">
+            <!-- Search Input -->
+            <div class="col-12 col-md-4">
+                <label for="searchInput" class="form-label text-secondary small fw-semibold">Search Songs</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-dark text-light border-secondary" id="searchInput"
+                           name="query" th:value="${query}" placeholder="Title, artist, album, genre...">
+                </div>
+            </div>
+
+            <!-- Genre Filter -->
+            <div class="col-6 col-md-3">
+                <label for="genreSelect" class="form-label text-secondary small fw-semibold">Genre</label>
+                <select class="form-select bg-dark text-light border-secondary" id="genreSelect" name="genre">
+                    <option value="" th:selected="${genre == null or genre == ''}">All Genres</option>
+                    <option th:each="g : ${genres}" th:value="${g}" th:text="${g}" th:selected="${genre == g}">Genre</option>
+                </select>
+            </div>
+
+            <!-- Sort By (Whitelisted) -->
+            <div class="col-6 col-md-3">
+                <label for="sortSelect" class="form-label text-secondary small fw-semibold">Sort By</label>
+                <select class="form-select bg-dark text-light border-secondary" id="sortSelect" name="sort">
+                    <option value="createdAt" th:selected="${sortField == 'createdAt'}">Date Added</option>
+                    <option value="title" th:selected="${sortField == 'title'}">Title</option>
+                    <option value="artist" th:selected="${sortField == 'artist'}">Artist</option>
+                    <option value="album" th:selected="${sortField == 'album'}">Album</option>
+                    <option value="genre" th:selected="${sortField == 'genre'}">Genre</option>
+                    <option value="durationSeconds" th:selected="${sortField == 'durationSeconds'}">Duration</option>
+                    <option value="releaseYear" th:selected="${sortField == 'releaseYear'}">Release Year</option>
+                </select>
+            </div>
+
+            <!-- Sort Direction & Submit -->
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <input type="hidden" name="dir" th:value="${sortDir == 'asc' ? 'desc' : 'asc'}" id="sortDirInput"/>
+                <button type="submit" class="btn btn-outline-success flex-grow-1">Filter</button>
+                <a th:href="@{/songs}" class="btn btn-outline-secondary" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Songs Table -->
+    <div class="custom-card overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 50px;"></th>
+                    <th style="width: 40px;"></th>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Album</th>
+                    <th>Genre</th>
+                    <th>Duration</th>
+                    <th>Year</th>
+                    <th style="width: 120px;" class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Empty State -->
+                <tr th:if="${songsPage.empty}">
+                    <td colspan="9" class="text-center py-5 text-secondary">
+                        <i class="bi bi-music-note-list fs-1 mb-2 d-block"></i>
+                        <h5>No songs found</h5>
+                        <p class="small mb-3">Try adjusting your search criteria or add a new song to get started.</p>
+                        <a th:href="@{/songs/new}" class="btn btn-sm btn-primary-custom" sec:authorize="isAuthenticated()">Add Song</a>
+                    </td>
+                </tr>
+
+                <!-- Song Rows -->
+                <tr th:each="song : ${songsPage.content}">
+                    <!-- Play Button -->
+                    <td>
+                        <button class="btn-play-row btn-play-song" th:data-song-id="${song.id}" title="Play Track">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </button>
+                    </td>
+
+                    <!-- Heart Favourite Button -->
+                    <td>
+                        <button class="btn-heart" th:classappend="${song.favourited ? 'active' : ''}"
+                                th:data-song-id="${song.id}" title="Toggle Favourite" sec:authorize="isAuthenticated()">
+                            <i th:class="${song.favourited ? 'bi bi-heart-fill' : 'bi bi-heart'}"></i>
+                        </button>
+                        <span sec:authorize="isAnonymous()" class="text-muted" title="Sign in to favourite">
+                            <i class="bi bi-heart"></i>
+                        </span>
+                    </td>
+
+                    <!-- Title -->
+                    <td>
+                        <a th:href="@{/songs/{id}(id=${song.id})}" class="text-light fw-semibold text-decoration-none">
+                            <span th:text="${song.title}">Song Title</span>
+                        </a>
+                    </td>
+
+                    <!-- Artist -->
+                    <td class="text-secondary" th:text="${song.artist}">Artist Name</td>
+
+                    <!-- Album -->
+                    <td class="text-secondary" th:text="${song.album != null and !song.album.isBlank() ? song.album : '-'}">Album</td>
+
+                    <!-- Genre Badge -->
+                    <td>
+                        <span class="badge-genre" th:text="${song.genre}">Genre</span>
+                    </td>
+
+                    <!-- Duration -->
+                    <td class="text-secondary" th:text="${song.formattedDuration}">3:45</td>
+
+                    <!-- Year -->
+                    <td class="text-secondary" th:text="${song.releaseYear != null ? song.releaseYear : '-'}">2022</td>
+
+                    <!-- Actions -->
+                    <td class="text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                                <li>
+                                    <button class="dropdown-item btn-add-queue" th:data-song-id="${song.id}">
+                                        <i class="bi bi-list-ul me-2"></i>Add to Queue
+                                    </button>
+                                </li>
+                                <!-- Add to Playlist (if authenticated) -->
+                                <li sec:authorize="isAuthenticated()">
+                                    <h6 class="dropdown-header text-muted">Add to Playlist</h6>
+                                </li>
+                                <li sec:authorize="isAuthenticated()" th:each="pl : ${userPlaylists}">
+                                    <form th:action="@{/playlists/{id}/songs/add(id=${pl.id})}" method="post" class="m-0">
+                                        <input type="hidden" name="songId" th:value="${song.id}"/>
+                                        <input type="hidden" name="redirectUrl" th:value="@{/songs(query=${query}, genre=${genre}, page=${songsPage.number}, sort=${sortField}, dir=${sortDir})}"/>
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-plus me-1"></i><span th:text="${pl.name}">Playlist</span>
+                                        </button>
+                                    </form>
+                                </li>
+                                <li sec:authorize="isAuthenticated()"><hr class="dropdown-divider"></li>
+
+                                <!-- Creator or Admin actions -->
+                                <li th:if="${song.canEdit}">
+                                    <a class="dropdown-item" th:href="@{/songs/{id}/edit(id=${song.id})}">
+                                        <i class="bi bi-pencil me-2"></i>Edit
+                                    </a>
+                                </li>
+                                <li th:if="${song.canEdit}">
+                                    <form th:action="@{/songs/{id}/delete(id=${song.id})}" method="post"
+                                          onsubmit="return confirm('Are you sure you want to delete this song? It will be removed from all playlists.');">
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-trash me-2"></i>Delete
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:replace="~{layout/fragments :: pagination(${songsPage}, '/songs', ${query}, ${genre}, ${sortField}, ${sortDir})}"></div>
+</div>
+</body>
+</html>

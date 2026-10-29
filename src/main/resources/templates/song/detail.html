@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::content})}">
+<head>
+    <title th:text="${song.title + ' - BeatStream'}">Song Details</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a th:href="@{/songs}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Catalog</a>
+            </div>
+
+            <div class="custom-card p-4 p-md-5">
+                <div class="d-flex flex-column flex-sm-row align-items-center gap-4 mb-4">
+                    <div class="rounded-3 p-4 bg-dark d-flex align-items-center justify-content-center text-success border border-secondary" style="width: 120px; height: 120px;">
+                        <i class="bi bi-disc fs-1"></i>
+                    </div>
+                    <div class="text-center text-sm-start flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 mb-1">
+                            <span class="badge-genre" th:text="${song.genre}">Genre</span>
+                            <span class="text-secondary small" th:if="${song.releaseYear != null}" th:text="'• ' + ${song.releaseYear}">• 2024</span>
+                        </div>
+                        <h2 class="fw-bold mb-1" th:text="${song.title}">Song Title</h2>
+                        <h5 class="text-secondary mb-3" th:text="${song.artist}">Artist Name</h5>
+
+                        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start gap-2">
+                            <button class="btn btn-sm btn-primary-custom btn-play-song" th:data-song-id="${song.id}">
+                                <i class="bi bi-play-fill me-1"></i> Play Track
+                            </button>
+                            <button class="btn btn-sm btn-outline-light btn-add-queue" th:data-song-id="${song.id}">
+                                <i class="bi bi-list-ul me-1"></i> Add to Queue
+                            </button>
+                            <button class="btn btn-heart ms-2" th:classappend="${song.favourited ? 'active' : ''}"
+                                    th:data-song-id="${song.id}" title="Toggle Favourite" sec:authorize="isAuthenticated()">
+                                <i th:class="${song.favourited ? 'bi bi-heart-fill' : 'bi bi-heart'}"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-4">
+
+                <div class="row g-3">
+                    <div class="col-6 col-sm-3">
+                        <div class="text-secondary small">Duration</div>
+                        <div class="fw-semibold" th:text="${song.formattedDuration}">3:45</div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="text-secondary small">Album</div>
+                        <div class="fw-semibold" th:text="${song.album != null and !song.album.isBlank() ? song.album : 'Single'}">Album</div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="text-secondary small">Added By</div>
+                        <div class="fw-semibold" th:text="${song.createdByUsername}">User</div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="text-secondary small">Date Added</div>
+                        <div class="fw-semibold" th:text="${#temporals.format(song.createdAt, 'MMM dd, yyyy')}">Oct 29, 2024</div>
+                    </div>
+                </div>
+
+                <!-- Creator / Admin Controls -->
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top border-secondary" th:if="${song.canEdit}">
+                    <a th:href="@{/songs/{id}/edit(id=${song.id})}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil me-1"></i> Edit Song
+                    </a>
+                    <form th:action="@{/songs/{id}/delete(id=${song.id})}" method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this song? It will be removed from all playlists.');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i> Delete Song
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

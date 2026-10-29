@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(~{::content})}">
+<head>
+    <title th:text="${isEdit ? 'Rename Playlist - BeatStream' : 'New Playlist - BeatStream'}">Playlist Form</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="d-flex align-items-center mb-3">
+                <a th:href="@{/playlists}" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i> Back to Playlists</a>
+                <h2 class="fw-bold mb-0" th:text="${isEdit ? 'Rename Playlist' : 'Create New Playlist'}">Playlist Form</h2>
+            </div>
+
+            <div class="custom-card p-4 p-sm-5 shadow-lg">
+                <form th:action="${isEdit ? '/playlists/' + playlistId + '/edit' : '/playlists/new'}" th:object="${playlistForm}" method="post">
+                    <!-- CSRF Token -->
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <!-- Playlist Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label text-secondary small fw-semibold">Playlist Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="name"
+                               th:field="*{name}" placeholder="e.g. Chill Synth Beats"
+                               th:classappend="${#fields.hasErrors('name') ? 'is-invalid' : ''}" required>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label for="description" class="form-label text-secondary small fw-semibold">Description (Optional)</label>
+                        <textarea class="form-control bg-dark text-light border-secondary" id="description"
+                                  th:field="*{description}" rows="3" placeholder="What is this playlist about?"
+                                  th:classappend="${#fields.hasErrors('description') ? 'is-invalid' : ''}"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description error</div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/playlists}" class="btn btn-outline-secondary px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary-custom px-4" th:text="${isEdit ? 'Save Changes' : 'Create Playlist'}">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
